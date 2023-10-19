@@ -1,11 +1,11 @@
 import pandas as pd
-#from fuzzywuzzy import process
+from fuzzywuzzy import process
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import numpy as np
-#import requests
-#import speech_recognition as sr
+import requests
+import speech_recognition as sr
 
 df = pd.read_excel('RemédioseFarmáciasJuntos.xlsx')
 df_pharmacy = pd.read_excel('Farmácias.xlsx')
@@ -102,7 +102,7 @@ def haversine(coord1, coord2):
     return distance
 
 # Função para capturar entrada de voz do usuário
-def get_user_input():
+#def get_user_input():
     recognizer = sr.Recognizer()
 
     with sr.Microphone() as source:
@@ -134,9 +134,9 @@ def get_user_input():
             print("Escolha inválida. Escolha 'falar' ou 'digitar'.")
             return None
 
-def main():
+def main(remedio):
     # Solicita ao usuário o nome do remédio desejado
-    nome_remedio_desejado = get_user_input()
+    nome_remedio_desejado = remedio
     nomes_disponiveis = remedios_clusterizados["Nome"].tolist()
 
     # Verifica se o nome digitado ou falado corresponde exatamente a um nome na tabela (insensível a maiúsculas e minúsculas)
@@ -204,17 +204,6 @@ def main():
             print("Nenhuma farmácia encontrada dentro do raio.")
     else:
         print("Não foi possível obter sua localização.")
-
-def find_name(name):
-    nomes_disponiveis = remedios_clusterizados["Nome"].tolist()
-
-    # Verifica se o nome digitado ou falado corresponde exatamente a um nome na tabela (insensível a maiúsculas e minúsculas)
-    if name and name.lower() in [nome.lower() for nome in nomes_disponiveis]:
-        resultado_nome = search_by_name(remedios_clusterizados, name)
-        return resultado_nome['Nome'].tolist()[0]
-    return []
-
-
 
 
 if __name__ == "__main__":

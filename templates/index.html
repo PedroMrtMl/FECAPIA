@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDIA</title>
+</head>
+<body>
+    <form method="POST">
+        <input type="text" name="sl" placeholder="sepal length (cm)" />
+        <input type="text" name="sw" placeholder="sepal width (cm)" />
+        <input type="text" name="pl" placeholder="petal length (cm)" />
+        <input type="submit" value="Enviar" />
+
+    </form>
+
+    {% if result != None %}
+    <p>Seu resultado é: <b>{{ result }}</b></p>
+    {% endif %}
+</body>
+</html>
