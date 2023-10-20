@@ -1,4 +1,4 @@
-from mycode import function
+from mediacode import main
 from flask import Flask, request, render_template
 
 app = Flask(__name__)
@@ -7,10 +7,8 @@ app = Flask(__name__)
 def index():
     result = None
     if request.method == 'POST':
-        sl = float(request.form.get('sl'))
-        sw = float(request.form.get('sw')) 
-        pl = float(request.form.get('pl'))
-        result = function(sl,sw,pl)
+        remedio = request.form.get('remedio')
+        result = main(remedio)
     return render_template('index.html', result=result)
 
 @app.route('/hello', methods=['GET'])

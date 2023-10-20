@@ -144,11 +144,12 @@ def main(remedio):
     nomes_disponiveis = remedios_clusterizados["Nome"].tolist()
 
     # Verifica se o nome digitado ou falado corresponde exatamente a um nome na tabela (insensível a maiúsculas e minúsculas)
+    result = ""
     if nome_remedio_desejado and nome_remedio_desejado.lower() in [nome.lower() for nome in nomes_disponiveis]:
         resultado_nome = search_by_name(remedios_clusterizados, nome_remedio_desejado)
 
         print("Pesquisa por Nome:")
-        print(resultado_nome.drop("Cluster", axis=1))
+        result += resultado_nome.drop("Cluster", axis=1).to_string(index=False)
     else:
         nome_corrigido, score = corrigir_nome_digitado(nome_remedio_desejado, nomes_disponiveis)
 
@@ -162,7 +163,7 @@ def main(remedio):
                     # Resultado
                     resultado_nome = search_by_name(remedios_clusterizados, nome_corrigido)
                     print("Pesquisa por Nome:")
-                    print(resultado_nome.drop("Cluster", axis=1)[["Nome", "Descrição", "Forma de Uso", "Efeitos Colaterais"]].to_string(index=False))
+                    result += resultado_nome.drop("Cluster", axis=1)[["Nome", "Descrição", "Forma de Uso", "Efeitos Colaterais"]].to_string(index=False)
                     break
                 elif resposta == 'n':  
                     nome_remedio_desejado = remedio
@@ -173,16 +174,16 @@ def main(remedio):
             # Nome reconhecido corretamente, apenas mostrar o resultado
             resultado_nome = search_by_name(remedios_clusterizados, nome_remedio_desejado)
             print("Pesquisa por Nome:")
-            print(resultado_nome.drop("Cluster", axis=1)[["Nome", "Descrição", "Forma de Uso", "Efeitos Colaterais"]].to_string(index=False))
+            result += resultado_nome.drop("Cluster", axis=1)[["Nome", "Descrição", "Forma de Uso", "Efeitos Colaterais"]].to_string(index=False)
 
 
     pharmacy_ids_prices = get_pharmacy_id_by_product_id(resultado_nome['ID'].iloc[0],df)
     pharmacy_ids = [x[0] for x in pharmacy_ids_prices]
     nomes_farmácias = get_pharmacy_names_by_ids(pharmacy_ids, df_pharmacy)
     resposta = map(lambda x, y: f'{x} R${y[1]}', nomes_farmácias, pharmacy_ids_prices)
-
+    result = ""
     if nomes_farmácias:
-        print(f"\nEsse remédio pode ser encontrado na(s) seguinte(s) farmácia(s): {', '.join(resposta)}")
+        result += f"\nEsse remédio pode ser encontrado na(s) seguinte(s) farmácia(s): {', '.join(resposta)}"
     else:
         print("\nNenhuma farmácia encontrada com esse remédio")
     api_key = 'AIzaSyApThPkV_jw1ErOzFYNMWS626vu_-9Sd2s'
@@ -200,16 +201,18 @@ def main(remedio):
         pharmacies = get_nearby_pharmacies_by_ids(user_location, radius_km, pharmacies_data,pharmacy_ids)
 
         if pharmacies:
-            print("\nFarmácias encontradas dentro do raio:")
+            result += "\n\nFarmácias encontradas dentro do raio:"
             for idx, pharmacy in enumerate(pharmacies, start=1):
-                print(f"{idx}. {pharmacy['name']} - Distância: {pharmacy['distance']:.2f} km")
+               result += f"\n{idx}. {pharmacy['name']} - Distância: {pharmacy['distance']:.2f} km"
 
         else:
             print("Nenhuma farmácia encontrada dentro do raio.")
     else:
         print("Não foi possível obter sua localização.")
 
+    return result
 
 if __name__ == "__main__":
-    main('Cetirizina')
+    result = main('Cetirizina')
+    print(result)
 
