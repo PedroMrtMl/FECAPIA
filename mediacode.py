@@ -71,14 +71,18 @@ def get_user_location(api_key):
         print("Erro ao obter a localização:", e)
         return None
 
-def get_nearby_pharmacies_by_ids(user_location, radius_km, pharmacies_data, pharmacy_id):
+def get_nearby_pharmacies_by_ids(user_location, radius_km, pharmacy_data, pharmacy_ids):
     pharmacies_with_distances = []
-
-    for _, pharmacy in pharmacies_data.iterrows():
-        pharmacy_location = (pharmacy['Latitude'], pharmacy['Longitude'])
-        distance = haversine(user_location, pharmacy_location)
-        if distance <= radius_km and pharmacy['ID'] in pharmacy_id:
-            pharmacies_with_distances.append({"id": pharmacy['ID'], "name": pharmacy['Name'], "distance": distance})
+    for pharmacy_id in pharmacy_ids:
+        pharmacy_row = pharmacy_data[pharmacy_data['ID'] == pharmacy_id]
+        if not pharmacy_row.empty:
+            lat = pharmacy_row.iloc[0]['Latitude']
+            lon = pharmacy_row.iloc[0]['Longitude']
+            name = pharmacy_row.iloc[0]['Name']
+            pharmacy_location = (lat, lon)
+            distance = haversine(user_location, pharmacy_location)
+            if distance <= radius_km:
+                pharmacies_with_distances.append({"id": pharmacy_id, "name": name, "distance": distance})
 
     pharmacies_with_distances.sort(key=lambda x: x['distance'])
 
@@ -160,8 +164,8 @@ def main(remedio):
                     print("Pesquisa por Nome:")
                     print(resultado_nome.drop("Cluster", axis=1)[["Nome", "Descrição", "Forma de Uso", "Efeitos Colaterais"]].to_string(index=False))
                     break
-                elif resposta == 'n':
-                    nome_remedio_desejado = get_user_input()
+                elif resposta == 'n':  
+                    nome_remedio_desejado = remedio
                     nome_corrigido, score = corrigir_nome_digitado(nome_remedio_desejado, nomes_disponiveis)
                 else:
                     print("Resposta inválida. Responda S para Sim e N para Não.")
@@ -173,7 +177,7 @@ def main(remedio):
 
 
     pharmacy_ids_prices = get_pharmacy_id_by_product_id(resultado_nome['ID'].iloc[0],df)
-    pharmacy_ids = map(lambda x: x[0], pharmacy_ids_prices)
+    pharmacy_ids = [x[0] for x in pharmacy_ids_prices]
     nomes_farmácias = get_pharmacy_names_by_ids(pharmacy_ids, df_pharmacy)
     resposta = map(lambda x, y: f'{x} R${y[1]}', nomes_farmácias, pharmacy_ids_prices)
 
@@ -207,5 +211,5 @@ def main(remedio):
 
 
 if __name__ == "__main__":
-    main()
+    main('Cetirizina')
 
